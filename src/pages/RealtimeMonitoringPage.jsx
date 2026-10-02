@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Settings, X } from 'lucide-react';
 import gasTankImg from '../assets/gas_tank.png';
 import ModalPortal from '../components/ModalPortal';
@@ -16,6 +16,22 @@ export default function RealtimeMonitoringPage() {
     currentPressure,
     hourlyConsumption: hourlyData
   } = useGasData();
+
+  // Consumption bar chart hover & mouse tracking (matches DashboardBarChart tooltip)
+  const chartContainerRef = useRef(null);
+  const [hoveredBarIdx, setHoveredBarIdx] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  const handleChartMouseMove = (e) => {
+    if (!chartContainerRef.current) return;
+    const rect = chartContainerRef.current.getBoundingClientRect();
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  const isNearRightEdge = chartContainerRef.current && mousePos.x > chartContainerRef.current.offsetWidth - 160;
 
   // Modals state
   const [showLevelModal, setShowLevelModal] = useState(false);
@@ -486,7 +502,12 @@ export default function RealtimeMonitoringPage() {
                     <span className="leading-none translate-y-1/2">0</span>
                   </div>
 
-                  <div className="flex-1 relative min-w-0 border-b border-gray-200">
+                  <div
+                    ref={chartContainerRef}
+                    onMouseMove={handleChartMouseMove}
+                    onMouseLeave={() => setHoveredBarIdx(null)}
+                    className="flex-1 relative min-w-0 border-b border-gray-200"
+                  >
                     <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
                       <div className="w-full h-[1px] bg-gray-100" />
                       <div className="w-full h-[1px] bg-gray-100" />
@@ -498,22 +519,62 @@ export default function RealtimeMonitoringPage() {
                     <div className="relative z-10 w-full h-full flex items-end gap-2 sm:gap-3.5 lg:gap-4.5 px-1 sm:px-2">
                       {hourlyData.map((item, idx) => {
                         const heightPercent = Math.round((item.consumption / maxConsumption) * 100);
+                        const isHovered = hoveredBarIdx === idx;
                         return (
                           <div
                             key={idx}
-                            className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer relative"
+                            onMouseEnter={() => setHoveredBarIdx(idx)}
+                            className="flex-1 flex flex-col items-center h-full justify-end cursor-pointer relative"
                           >
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-gray-600 bg-white/95 px-1.5 py-0.5 rounded shadow-xs border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none select-none z-20 whitespace-nowrap">
-                              {item.consumption} Nm³/h
-                            </span>
                             <div
-                              className="w-full max-w-[46px] sm:max-w-[54px] lg:max-w-[60px] bg-[#2196F3] rounded-t-[4px] hover:bg-[#1E88E5] transition-all duration-700 ease-out"
+                              className={`w-full max-w-[46px] sm:max-w-[54px] lg:max-w-[60px] rounded-t-[4px] transition-all duration-300 ease-out ${
+                                isHovered ? 'bg-[#1E88E5]' : 'bg-[#2196F3]'
+                              }`}
                               style={{ height: `${heightPercent}%` }}
                             />
                           </div>
                         );
                       })}
                     </div>
+
+                    {/* Interactive Tooltip matching Dashboard Consumption Bar Chart */}
+                    {hoveredBarIdx !== null && hourlyData[hoveredBarIdx] && (
+                      <div
+                        className="absolute z-30 pointer-events-none transition-all duration-75 ease-out"
+                        style={{
+                          left: `${mousePos.x}px`,
+                          top: `${Math.max(40, Math.min((chartContainerRef.current?.offsetHeight || 160) - 40, mousePos.y))}px`,
+                          transform: isNearRightEdge
+                            ? 'translate(calc(-100% - 14px), -50%)'
+                            : 'translate(14px, -50%)'
+                        }}
+                      >
+                        <div className="relative bg-white rounded-xl shadow-xl border border-gray-100 p-2.5 min-w-[140px] select-none">
+                          {/* Triangular pointer notch pointing towards cursor */}
+                          <div
+                            className={`absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rotate-45 border-gray-100 ${
+                              isNearRightEdge ? '-right-1.5 border-r border-t' : '-left-1.5 border-l border-b'
+                            }`}
+                          />
+
+                          {/* Tooltip Header Title */}
+                          <div className="text-[11px] font-bold text-[#1E232F] text-center pb-1.5 border-b border-gray-100 tracking-tight">
+                            07 Sep 2026, {hourlyData[hoveredBarIdx].time}
+                          </div>
+
+                          {/* Tooltip Row */}
+                          <div className="pt-1.5 flex items-center justify-between gap-3 text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-[#2196F3] shrink-0" />
+                              <span className="text-gray-600 font-medium">Consumption</span>
+                            </div>
+                            <span className="font-bold text-[#1E232F]">
+                              {hourlyData[hoveredBarIdx].consumption} Nm³/h
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
