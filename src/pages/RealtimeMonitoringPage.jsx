@@ -184,12 +184,13 @@ export default function RealtimeMonitoringPage() {
   }, [gaugeArcs]);
 
   // Modal open handlers
-  const handleOpenLevelModal = () => {
-    setNormalLevel(levelConfig.normalThreshold);
-    setWarningLevel(levelConfig.warningThreshold);
-    setCriticalLevel(levelConfig.criticalThreshold);
-    setShowLevelModal(true);
-  };
+  const
+    handleOpenLevelModal = () => {
+      setNormalLevel(levelConfig.normalThreshold);
+      setWarningLevel(levelConfig.warningThreshold);
+      setCriticalLevel(levelConfig.criticalThreshold);
+      setShowLevelModal(true);
+    };
 
   const handleSaveLevelModal = (e) => {
     e.preventDefault();
@@ -527,9 +528,8 @@ export default function RealtimeMonitoringPage() {
                             className="flex-1 flex flex-col items-center h-full justify-end cursor-pointer relative"
                           >
                             <div
-                              className={`w-full max-w-[46px] sm:max-w-[54px] lg:max-w-[60px] rounded-t-[4px] transition-all duration-300 ease-out ${
-                                isHovered ? 'bg-[#1E88E5]' : 'bg-[#2196F3]'
-                              }`}
+                              className={`w-full max-w-[46px] sm:max-w-[54px] lg:max-w-[60px] rounded-t-[4px] transition-all duration-300 ease-out ${isHovered ? 'bg-[#1E88E5]' : 'bg-[#2196F3]'
+                                }`}
                               style={{ height: `${heightPercent}%` }}
                             />
                           </div>
@@ -552,9 +552,8 @@ export default function RealtimeMonitoringPage() {
                         <div className="relative bg-white rounded-xl shadow-xl border border-gray-100 p-2.5 min-w-[140px] select-none">
                           {/* Triangular pointer notch pointing towards cursor */}
                           <div
-                            className={`absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rotate-45 border-gray-100 ${
-                              isNearRightEdge ? '-right-1.5 border-r border-t' : '-left-1.5 border-l border-b'
-                            }`}
+                            className={`absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rotate-45 border-gray-100 ${isNearRightEdge ? '-right-1.5 border-r border-t' : '-left-1.5 border-l border-b'
+                              }`}
                           />
 
                           {/* Tooltip Header Title */}
@@ -618,7 +617,7 @@ export default function RealtimeMonitoringPage() {
           <form onSubmit={handleSaveLevelModal} className="p-6 space-y-4">
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Normal Pressure Threshold
+                Normal Level Threshold
               </label>
               <div className="relative">
                 <input
@@ -638,7 +637,7 @@ export default function RealtimeMonitoringPage() {
 
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Warning Pressure Threshold
+                Warning Level Threshold
               </label>
               <div className="relative">
                 <input
@@ -658,7 +657,7 @@ export default function RealtimeMonitoringPage() {
 
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Critical Pressure Threshold
+                Critical Level Threshold
               </label>
               <div className="relative">
                 <input
